@@ -84,7 +84,7 @@ const CustomButton = ({
       )}
 
       <Text
-        className={`text-lg font-InterBold ${getTextVariantStyle(textVariant)}`}
+        className={`text-lg font-bold ${getTextVariantStyle(textVariant)}`}
       >
         {title}
       </Text>

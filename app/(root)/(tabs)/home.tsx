@@ -142,7 +142,7 @@ const Home = () => {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50">
         <ActivityIndicator size="large" color="#4ca44d" />
-        <Text className="mt-4 text-gray-600 font-InterMedium">
+        <Text className="mt-4 text-gray-600 font-medium">
           Loading your assets...
         </Text>
       </View>
@@ -153,7 +153,7 @@ const Home = () => {
   if (error) {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50 px-6">
-        <Text className="text-red-500 text-center font-InterMedium text-lg">{`Error: ${error}`}</Text>
+        <Text className="text-red-500 text-center font-medium text-lg">{`Error: ${error}`}</Text>
       </View>
     );
   }
@@ -194,10 +194,10 @@ const Home = () => {
             <View className="flex-1 items-center justify-center py-10">
               {assets.length === 0 ? (
                 <View className="items-center px-8">
-                  <Text className="text-2xl font-InterBold text-gray-900 mb-3 text-center">
+                  <Text className="text-2xl font-bold text-gray-900 mb-3 text-center">
                     Start Building Your Portfolio
                   </Text>
-                  <Text className="text-gray-600 font-InterMedium text-center text-base leading-6">
+                  <Text className="text-gray-600 font-medium text-center text-base leading-6">
                     Add your first asset to begin tracking your financial
                     journey.
                   </Text>
@@ -213,7 +213,7 @@ const Home = () => {
             {/* Header Section */}
             <View className="flex-row items-center justify-between mb-6 mt-6 px-1">
               <View>
-                <Text className="text-3xl font-InterExtraBold text-gray-900">
+                <Text className="text-3xl font-extrabold text-gray-900">
                   Portfolio
                 </Text>
               </View>
@@ -235,7 +235,7 @@ const Home = () => {
             {/* Assets Section Header */}
             {assets.length > 0 && (
               <View className="flex-row items-center justify-between mb-4 px-1">
-                <Text className="text-xl font-InterBold text-gray-900">
+                <Text className="text-xl font-bold text-gray-900">
                   Your Assets
                 </Text>
               </View>

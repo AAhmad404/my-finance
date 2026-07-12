@@ -100,7 +100,7 @@ const AddAsset = () => {
       >
         {/* Header Section */}
         <View className="mt-6 mb-8">
-          <Text className="text-3xl font-InterExtraBold text-gray-900 mb-2">
+          <Text className="text-3xl font-extrabold text-gray-900 mb-2">
             Add New Asset
           </Text>
         </View>

@@ -83,17 +83,17 @@ const Profile = () => {
           </View>
         )}
         <View className={`flex-1 ${!icon ? "ml-4" : ""}`}>
-          <Text className={`text-base font-InterSemiBold ${textColor}`}>
+          <Text className={`text-base font-semibold ${textColor}`}>
             {title}
           </Text>
           {subtitle && (
-            <Text className="text-sm font-InterMedium text-gray-500 mt-1">
+            <Text className="text-sm font-medium text-gray-500 mt-1">
               {subtitle}
             </Text>
           )}
         </View>
         {showArrow && (
-          <Text className="text-gray-400 text-lg font-InterBold">›</Text>
+          <Text className="text-gray-400 text-lg font-bold">›</Text>
         )}
       </View>
     </TouchableOpacity>
@@ -108,7 +108,7 @@ const Profile = () => {
       >
         {/* Header */}
         <View className="px-6 pt-6 pb-4">
-          <Text className="text-3xl font-InterExtraBold text-gray-900">
+          <Text className="text-3xl font-extrabold text-gray-900">
             Profile
           </Text>
         </View>
@@ -125,17 +125,17 @@ const Profile = () => {
                     className="w-20 h-20 rounded-full"
                   />
                 ) : (
-                  <Text className="text-2xl font-InterBold text-primary-600">
+                  <Text className="text-2xl font-bold text-primary-600">
                     {user?.emailAddresses[0]?.emailAddress?.charAt(0).toUpperCase() ||
                       "U"}
                   </Text>
                 )}
               </View>
               <View className="flex-1">
-                <Text className="text-xl font-InterExtraBold text-gray-900 mb-1">
+                <Text className="text-xl font-extrabold text-gray-900 mb-1">
                   User
                 </Text>
-                <Text className="text-base font-InterMedium text-gray-600">
+                <Text className="text-base font-medium text-gray-600">
                   {user?.primaryEmailAddress?.emailAddress}
                 </Text>
               </View>
@@ -144,7 +144,7 @@ const Profile = () => {
             {/* Account Stats */}
             <View className="flex-row justify-between pt-4 border-t border-gray-100">
               <View className="items-center flex-1">
-                <Text className="text-xl font-InterExtraBold text-gray-900">
+                <Text className="text-xl font-extrabold text-gray-900">
                   {new Date(user?.createdAt || Date.now()).toLocaleDateString(
                     "en-US",
                     {
@@ -153,16 +153,16 @@ const Profile = () => {
                     },
                   )}
                 </Text>
-                <Text className="text-sm font-InterMedium text-gray-500 mt-1">
+                <Text className="text-sm font-medium text-gray-500 mt-1">
                   Member Since
                 </Text>
               </View>
               <View className="w-px bg-gray-200 mx-4" />
               <View className="items-center flex-1">
-                <Text className="text-xl font-InterExtraBold text-primary-600">
+                <Text className="text-xl font-extrabold text-primary-600">
                   Regular
                 </Text>
-                <Text className="text-sm font-InterMedium text-gray-500 mt-1">
+                <Text className="text-sm font-medium text-gray-500 mt-1">
                   Account Type
                 </Text>
               </View>
@@ -172,7 +172,7 @@ const Profile = () => {
 
         {/* Account Settings Section */}
         <View className="mx-6 mb-6">
-          <Text className="text-lg font-InterBold text-gray-900 mb-4 px-2">
+          <Text className="text-lg font-bold text-gray-900 mb-4 px-2">
             Account Settings
           </Text>
 
@@ -203,7 +203,7 @@ const Profile = () => {
 
         {/* App Settings Section */}
         <View className="mx-6 mb-6">
-          <Text className="text-lg font-InterBold text-gray-900 mb-4 px-2">
+          <Text className="text-lg font-bold text-gray-900 mb-4 px-2">
             App Settings
           </Text>
 
@@ -234,7 +234,7 @@ const Profile = () => {
 
         {/* Support Section */}
         <View className="mx-6 mb-6">
-          <Text className="text-lg font-InterBold text-gray-900 mb-4 px-2">
+          <Text className="text-lg font-bold text-gray-900 mb-4 px-2">
             Support & Info
           </Text>
 
@@ -298,10 +298,10 @@ const Profile = () => {
         {/* Danger Zone - Account Deletion */}
         <View className="mx-6">
           <View className="bg-red-50 border border-red-200 rounded-3xl p-6">
-            <Text className="text-lg font-InterBold text-red-800 mb-2">
+            <Text className="text-lg font-bold text-red-800 mb-2">
               Danger Zone
             </Text>
-            <Text className="text-red-600 font-InterMedium text-sm mb-4">
+            <Text className="text-red-600 font-medium text-sm mb-4">
               Deleting your account will permanently remove your profile and associated data. This action cannot be undone.
             </Text>
             <TouchableOpacity
@@ -340,7 +340,7 @@ const Profile = () => {
               }}
               className="bg-white py-3 px-6 rounded-2xl border border-red-100"
             >
-              <Text className="text-red-600 text-center font-InterBold">Delete Account</Text>
+              <Text className="text-red-600 text-center font-bold">Delete Account</Text>
             </TouchableOpacity>
           </View>
         </View>
