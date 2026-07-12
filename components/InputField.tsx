@@ -33,7 +33,7 @@ const InputField = ({
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View className="my-3 w-full">
           <Text
-            className={`text-sm font-InterSemiBold mb-3 text-gray-700 ${labelStyle}`}
+            className={`text-sm font-semibold mb-3 text-gray-700 ${labelStyle}`}
           >
             {label}
           </Text>
@@ -73,7 +73,7 @@ const InputField = ({
             )}
             <TextInput
               className={`
-                flex-1 py-4 px-2 font-InterMedium text-base text-gray-900
+                flex-1 py-4 px-2 font-medium text-base text-gray-900
                 ${icon ? "" : "ml-4"}
                 ${inputStyle}
               `}

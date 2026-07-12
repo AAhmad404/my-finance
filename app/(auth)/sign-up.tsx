@@ -86,7 +86,7 @@ const SignUp = () => {
               source={images.banner}
               className="z-0 w-full h-[250px] ml-[-5px]"
             />
-            <Text className="text-2xl text-black font-InterBold absolute top-7 left-5">
+            <Text className="text-2xl text-black font-bold absolute top-7 left-5">
               Get Started!
             </Text>
           </View>
@@ -134,10 +134,10 @@ const SignUp = () => {
           >
             <View className="flex-1 justify-center items-center bg-black/50">
               <View className="bg-white px-7 py-9 rounded-2xl min-h-[300px] w-[90%] max-w-sm">
-                <Text className="font-InterExtraBold text-2xl mb-2">
+                <Text className="font-extrabold text-2xl mb-2">
                   Verification
                 </Text>
-                <Text className="font-Inter mb-5">
+                <Text className="mb-5">
                   We've sent a verification code to {form.email}.
                 </Text>
                 <InputField

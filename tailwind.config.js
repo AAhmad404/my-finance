@@ -4,15 +4,6 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
-      fontFamily: {
-        Inter: ["Inter", "sans-serif"],
-        InterBold: ["Inter-Bold", "sans-serif"],
-        InterExtraBold: ["Inter-ExtraBold", "sans-serif"],
-        InterExtraLight: ["Inter-ExtraLight", "sans-serif"],
-        InterLight: ["Inter-Light", "sans-serif"],
-        InterMedium: ["Inter-Medium", "sans-serif"],
-        InterSemiBold: ["Inter-SemiBold", "sans-serif"],
-      },
       colors: {
         primary: {
           100: "#94C894",

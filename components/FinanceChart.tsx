@@ -190,18 +190,18 @@ const FinanceChart: React.FC<FinanceChartProps> = ({
       {(chartTitle !== "" || showCurrentStatusTitle) && (
         <View className="mb-2">
           {chartTitle !== "" && (
-            <Text className="font-InterBold text-lg text-gray-800 mb-2">
+            <Text className="font-bold text-lg text-gray-800 mb-2">
               {chartTitle}
             </Text>
           )}
           {showCurrentStatusTitle && (
             <View className="flex-row items-center justify-between">
               <View>
-                <Text className="font-InterBold text-2xl text-gray-900">
+                <Text className="font-bold text-2xl text-gray-900">
                   ${lastPrice.toFixed(2)}
                 </Text>
                 <Text
-                  className={`font-InterMedium text-sm ${isPositive ? "text-green-600" : "text-red-600"}`}
+                  className={`font-medium text-sm ${isPositive ? "text-green-600" : "text-red-600"}`}
                 >
                   {isPositive ? "+" : ""}${priceChange.toFixed(2)} (
                   {priceChangePercent}%)
@@ -244,7 +244,7 @@ const FinanceChart: React.FC<FinanceChartProps> = ({
             onPress={handleScrollToStart}
             className="bg-gray-100 px-4 py-2 rounded-lg"
           >
-            <Text className="text-xs font-InterMedium text-gray-700">
+            <Text className="text-xs font-medium text-gray-700">
               Start
             </Text>
           </TouchableOpacity>
@@ -252,7 +252,7 @@ const FinanceChart: React.FC<FinanceChartProps> = ({
             onPress={handleScrollToEnd}
             className="bg-gray-100 px-4 py-2 rounded-lg"
           >
-            <Text className="text-xs font-InterMedium text-gray-700">
+            <Text className="text-xs font-medium text-gray-700">
               Latest
             </Text>
           </TouchableOpacity>

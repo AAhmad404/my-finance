@@ -70,7 +70,7 @@ const SignIn = () => {
               source={images.banner}
               className="z-0 w-full h-[250px] ml-[-5px]"
             />
-            <Text className="text-2xl text-black font-InterBold absolute top-7 left-5">
+            <Text className="text-2xl text-black font-bold absolute top-7 left-5">
               Welcome Back!
             </Text>
           </View>

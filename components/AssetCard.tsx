@@ -19,20 +19,20 @@ const AssetCard = ({ asset }: { asset: Asset }) => {
       <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1 mr-4">
           <Text
-            className="text-lg font-InterBold text-gray-900 mb-1"
+            className="text-lg font-bold text-gray-900 mb-1"
             numberOfLines={1}
           >
             {asset.asset_name}
           </Text>
           <View className="flex-row items-center">
-            <Text className="text-2xl font-InterExtraBold text-gray-900 mr-2">
+            <Text className="text-2xl font-extrabold text-gray-900 mr-2">
               ${lastValue.value.toLocaleString()}
             </Text>
             <View
               className={`px-2 py-1 rounded-full ${isPositive ? "bg-green-100" : "bg-red-100"}`}
             >
               <Text
-                className={`text-xs font-InterSemiBold ${isPositive ? "text-green-700" : "text-red-700"}`}
+                className={`text-xs font-semibold ${isPositive ? "text-green-700" : "text-red-700"}`}
               >
                 {isPositive ? "+" : "-"}
                 {Math.abs(parseFloat(changePercent))}%
@@ -54,10 +54,10 @@ const AssetCard = ({ asset }: { asset: Asset }) => {
       <View className="flex-row justify-between items-center pt-3 border-t border-gray-100">
         <View></View>
         <View>
-          <Text className="text-xs font-InterMedium text-gray-500">
+          <Text className="text-xs font-medium text-gray-500">
             Last Updated
           </Text>
-          <Text className="text-sm font-InterSemiBold text-gray-700">
+          <Text className="text-sm font-semibold text-gray-700">
             {lastValue.date}
           </Text>
         </View>

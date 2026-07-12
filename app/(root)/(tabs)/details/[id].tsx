@@ -267,9 +267,9 @@ function ItemDetail() {
             onPress={handleReturn}
             className="flex-row items-center bg-gray-100 px-4 py-2 rounded-full"
           >
-            <Text className="text-gray-700 font-InterSemiBold">← Back</Text>
+            <Text className="text-gray-700 font-semibold">← Back</Text>
           </TouchableOpacity>
-          <Text className="text-lg font-InterBold text-gray-900">
+          <Text className="text-lg font-bold text-gray-900">
             Asset Details
           </Text>
           {/* Spacer for center alignment */}
@@ -288,25 +288,25 @@ function ItemDetail() {
               <View className="flex-row items-center p-4">
                 {/* Date Column */}
                 <View className="flex-1">
-                  <Text className="text-sm font-InterMedium text-gray-500 mb-1">
+                  <Text className="text-sm font-medium text-gray-500 mb-1">
                     Date
                   </Text>
-                  <Text className="text-base font-InterSemiBold text-gray-900">
+                  <Text className="text-base font-semibold text-gray-900">
                     {item.date}
                   </Text>
                 </View>
 
                 {/* Value Input Column */}
                 <View className="flex-1">
-                  <Text className="text-sm font-InterMedium text-gray-500 mb-1">
+                  <Text className="text-sm font-medium text-gray-500 mb-1">
                     Value
                   </Text>
                   <View className="flex-row items-center bg-gray-50 rounded-xl px-3 py-2">
-                    <Text className="font-InterMedium text-gray-600 mr-1">$</Text>
+                    <Text className="font-medium text-gray-600 mr-1">$</Text>
                     <TextInput
                       value={item.value.toString()}
                       onChangeText={(text) => handleUpdate(originalIndex, text)}
-                      className="flex-1 font-InterSemiBold text-base text-gray-900"
+                      className="flex-1 font-semibold text-base text-gray-900"
                       keyboardType="numeric"
                       placeholder="0.00"
                       placeholderTextColor="#9CA3AF"
@@ -330,7 +330,7 @@ function ItemDetail() {
                   }}
                   className="ml-3 w-8 h-8 bg-red-100 rounded-full items-center justify-center"
                 >
-                  <Text className="text-red-500 font-InterBold text-sm">×</Text>
+                  <Text className="text-red-500 font-bold text-sm">×</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -348,10 +348,10 @@ function ItemDetail() {
                 <View className="w-16 h-16 bg-gray-100 rounded-full items-center justify-center mb-4">
                   <Text className="text-2xl">📊</Text>
                 </View>
-                <Text className="text-lg font-InterBold text-gray-900 mb-2 text-center">
+                <Text className="text-lg font-bold text-gray-900 mb-2 text-center">
                   No Data Points
                 </Text>
-                <Text className="text-gray-600 font-InterMedium text-center">
+                <Text className="text-gray-600 font-medium text-center">
                   Add your first data point to start tracking this asset.
                 </Text>
               </View>
@@ -365,7 +365,7 @@ function ItemDetail() {
             {/* Asset Name Section */}
             <View className="bg-white mx-4 my-4 rounded-3xl border border-gray-100 shadow-sm p-6">
               <View className="mb-4">
-                <Text className="text-sm font-InterMedium text-gray-500 mb-2">
+                <Text className="text-sm font-medium text-gray-500 mb-2">
                   Asset Name
                 </Text>
                 <View className="flex-row items-center bg-gray-50 rounded-2xl border-2 border-gray-100 px-4 py-3">
@@ -378,7 +378,7 @@ function ItemDetail() {
                   <TextInput
                     value={assetName}
                     onChangeText={handleNameChange}
-                    className="flex-1 text-xl font-InterExtraBold text-gray-900"
+                    className="flex-1 text-xl font-extrabold text-gray-900"
                     placeholder="Enter asset name"
                     placeholderTextColor="#9CA3AF"
                   />
@@ -398,12 +398,12 @@ function ItemDetail() {
 
             {/* Data Points Header with Add button */}
             <View className="flex-row items-center justify-between mx-4 mb-4">
-              <Text className="text-xl font-InterBold text-gray-900">
+              <Text className="text-xl font-bold text-gray-900">
                 Data Points
               </Text>
               <View className="flex-row items-center">
                 <View className="bg-primary-100 px-3 py-1 rounded-full">
-                  <Text className="text-primary-700 font-InterSemiBold text-sm">
+                  <Text className="text-primary-700 font-semibold text-sm">
                     {valueHistory.length} entries
                   </Text>
                 </View>
@@ -413,7 +413,7 @@ function ItemDetail() {
                   onPress={handleAddRow}
                   className="ml-3 w-8 h-8 bg-primary-500 rounded-full items-center justify-center"
                 >
-                  <Text className="text-white font-InterBold text-sm">+</Text>
+                  <Text className="text-white font-bold text-sm">+</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -425,10 +425,10 @@ function ItemDetail() {
             {/* Danger Zone */}
             <View className="h-px bg-gray-200 mx-6 mb-6" />
             <View className="bg-red-50 border border-red-200 rounded-3xl p-6">
-              <Text className="text-lg font-InterBold text-red-800 mb-2">
+              <Text className="text-lg font-bold text-red-800 mb-2">
                 Danger Zone
               </Text>
-              <Text className="text-red-600 font-InterMedium text-sm mb-4">
+              <Text className="text-red-600 font-medium text-sm mb-4">
                 This action cannot be undone. All data will be permanently
                 deleted.
               </Text>
@@ -437,7 +437,7 @@ function ItemDetail() {
                 onPress={handleDeleteAsset}
                 className="bg-white py-3 px-6 rounded-2xl shadow-sm"
               >
-                <Text className="text-red-500 text-center font-InterBold">
+                <Text className="text-red-500 text-center font-bold">
                   Delete Asset
                 </Text>
               </TouchableOpacity>
@@ -457,20 +457,20 @@ function ItemDetail() {
           <View className="bg-white rounded-t-3xl p-6 max-h-4/5">
             {/* Modal Header */}
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-2xl font-InterExtraBold text-gray-900">
+              <Text className="text-2xl font-extrabold text-gray-900">
                 Select Date
               </Text>
               <TouchableOpacity
                 onPress={() => setShowDatePicker(false)}
                 className="w-8 h-8 bg-gray-100 rounded-full items-center justify-center"
               >
-                <Text className="text-gray-600 font-InterBold">✕</Text>
+                <Text className="text-gray-600 font-bold">✕</Text>
               </TouchableOpacity>
             </View>
 
             {/* Year Selection */}
             <View className="mb-6">
-              <Text className="text-lg font-InterBold mb-3 text-gray-900">
+              <Text className="text-lg font-bold mb-3 text-gray-900">
                 Year
               </Text>
               <ScrollView className="max-h-32 bg-gray-50 rounded-2xl border border-gray-200">
@@ -484,7 +484,7 @@ function ItemDetail() {
                     onPress={() => setSelectedYear(year)}
                   >
                     <Text
-                      className={`text-center ${selectedYear === year ? "font-InterBold text-primary-600" : "font-InterMedium text-gray-700"}`}
+                      className={`text-center ${selectedYear === year ? "font-bold text-primary-600" : "font-medium text-gray-700"}`}
                     >
                       {year}
                     </Text>
@@ -495,7 +495,7 @@ function ItemDetail() {
 
             {/* Month Selection */}
             <View className="mb-6">
-              <Text className="text-lg font-InterBold mb-3 text-gray-900">
+              <Text className="text-lg font-bold mb-3 text-gray-900">
                 Month
               </Text>
               <ScrollView className="max-h-48 bg-gray-50 rounded-2xl border border-gray-200">
@@ -519,7 +519,7 @@ function ItemDetail() {
                     onPress={() => setSelectedMonth(index + 1)}
                   >
                     <Text
-                      className={`text-center ${selectedMonth === index + 1 ? "font-InterBold text-primary-600" : "font-InterMedium text-gray-700"}`}
+                      className={`text-center ${selectedMonth === index + 1 ? "font-bold text-primary-600" : "font-medium text-gray-700"}`}
                     >
                       {month}
                     </Text>
@@ -530,7 +530,7 @@ function ItemDetail() {
 
             {/* Value Input Section */}
             <View className="mb-6">
-              <Text className="text-lg font-InterBold mb-3 text-gray-900">
+              <Text className="text-lg font-bold mb-3 text-gray-900">
                 Asset Value
               </Text>
               <View className="flex-row items-center bg-gray-50 rounded-2xl border border-gray-200 px-4 py-4">
@@ -560,7 +560,7 @@ function ItemDetail() {
                   setNewAssetValue(""); // Reset value when canceling
                 }}
               >
-                <Text className="text-gray-700 text-center font-InterBold">
+                <Text className="text-gray-700 text-center font-bold">
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -568,7 +568,7 @@ function ItemDetail() {
                 className="flex-1 bg-primary-500 py-4 rounded-2xl shadow-sm"
                 onPress={handleDateSelection}
               >
-                <Text className="text-white text-center font-InterBold">
+                <Text className="text-white text-center font-bold">
                   Add Data Point
                 </Text>
               </TouchableOpacity>
