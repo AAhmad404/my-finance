@@ -5,15 +5,15 @@ import { ButtonProps } from "@/types/type";
 const getBgVariantStyle = (variant: ButtonProps["bgVariant"]) => {
   switch (variant) {
     case "secondary":
-      return "bg-gray-600";
+      return "bg-secondary-800";
     case "danger":
-      return "bg-red-500";
+      return "bg-danger-600";
     case "success":
-      return "bg-green-500";
+      return "bg-primary-600";
     case "outline":
-      return "bg-transparent border-2 border-gray-200";
+      return "bg-transparent border border-secondary-300";
     default:
-      return "bg-primary-500";
+      return "bg-primary-600";
   }
 };
 
@@ -29,22 +29,6 @@ const getTextVariantStyle = (variant: ButtonProps["textVariant"]) => {
       return "text-white";
     default:
       return "text-white";
-  }
-};
-
-const getHoverStyle = (variant: ButtonProps["bgVariant"]) => {
-  switch (variant) {
-    case "secondary":
-      return "active:bg-gray-700";
-    case "danger":
-      return "active:bg-red-600";
-    case "success":
-      return "active:bg-green-600";
-    case "outline":
-      // subtle neutral hover for outline buttons
-      return "active:bg-gray-100";
-    default:
-      return "active:bg-primary-600";
   }
 };
 
@@ -64,17 +48,13 @@ const CustomButton = ({
       onPress={onPress}
       disabled={disabled}
       className={`
-        w-full rounded-2xl px-6 py-4 
+        min-h-14 w-full rounded-full px-6 py-4
         flex-row justify-center items-center 
-        shadow-lg shadow-black/10
         ${getBgVariantStyle(bgVariant)} 
-        ${getHoverStyle(bgVariant)}
         ${disabled ? "opacity-50" : "opacity-100"}
         ${className}
       `}
-      style={{
-        elevation: 4, // Android shadow
-      }}
+      activeOpacity={0.7}
       {...props}
     >
       {IconLeft && (
@@ -84,7 +64,7 @@ const CustomButton = ({
       )}
 
       <Text
-        className={`text-lg font-bold ${getTextVariantStyle(textVariant)}`}
+        className={`text-base font-semibold ${getTextVariantStyle(textVariant)}`}
       >
         {title}
       </Text>

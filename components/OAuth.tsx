@@ -7,8 +7,8 @@ import { icons } from "@/constants";
 import { googleOAuth } from "@/lib/auth";
 
 interface OAuthProp {
-  title: string
-};
+  title: string;
+}
 
 const OAuth: React.FC<OAuthProp> = ({ title }) => {
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
@@ -29,20 +29,20 @@ const OAuth: React.FC<OAuthProp> = ({ title }) => {
 
   return (
     <View>
-      <View className="flex flex-row justify-center items-center mt-4 gap-x-3">
-        <View className="flex-1 h-[1px] bg-general-100" />
-        <Text className="text-lg text-general-100">or</Text>
-        <View className="flex-1 h-[1px] bg-general-100" />
+      <View className="mt-7 flex-row items-center gap-x-3">
+        <View className="h-px flex-1 bg-secondary-300" />
+        <Text className="text-sm text-secondary-600">or</Text>
+        <View className="h-px flex-1 bg-secondary-300" />
       </View>
 
       <CustomButton
-        title={ title }
-        className="mt-5 w-full shadow-none"
+        title={title}
+        className="mt-7 w-full bg-white"
         IconLeft={() => (
           <Image
             source={icons.google}
             resizeMode="contain"
-            className="w-5 h-5 mx-2"
+            style={{ width: 20, height: 20 }}
           />
         )}
         bgVariant="outline"

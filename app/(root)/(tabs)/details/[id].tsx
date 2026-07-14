@@ -1,256 +1,210 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
 import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  Image,
   ActivityIndicator,
   Alert,
+  FlatList,
   Modal,
-  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import FinanceChart from "@/components/FinanceChart";
-import { router, useLocalSearchParams } from "expo-router";
-import { Asset } from "@/types/type";
-import { icons } from "@/constants";
-import { useUser } from "@clerk/clerk-expo";
-import { fetchAPI } from "@/lib/fetch";
+import PortfolioChart from "@/components/PortfolioChart";
 import { formatDate } from "@/lib/dateUtils";
+import { fetchAPI } from "@/lib/fetch";
+import { Asset, AssetValueHistoryDataType } from "@/types/type";
+
+type Range = "1M" | "6M" | "1Y" | "All";
+
+const ranges: Range[] = ["1M", "6M", "1Y", "All"];
+const months = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+const dateOptionStyle = {
+  selected: {
+    backgroundColor: "#449445",
+    borderColor: "#449445",
+  },
+  default: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D9D9D9",
+  },
+};
+
+const dateOptionTextStyle = {
+  selected: { color: "#FFFFFF" },
+  default: { color: "#666666" },
+};
+
+const parseAssets = (value: unknown): Asset[] => {
+  try {
+    if (typeof value === "string") return JSON.parse(value) as Asset[];
+    if (Array.isArray(value) && typeof value[0] === "string") {
+      return JSON.parse(value[0]) as Asset[];
+    }
+    return Array.isArray(value) ? (value as Asset[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+const formatCurrency = (value: number) =>
+  value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const parseHistoryDate = (date: string) => {
+  const [year, month, day] = date.split("/").map(Number);
+  return new Date(year, month - 1, day);
+};
 
 function ItemDetail() {
   const params = useLocalSearchParams();
-
-  // Defensive parsing of params.assets and params.assetId to avoid runtime
-  // errors if the route was triggered incorrectly or params are malformed.
-  let assets: Asset[] = [];
-  let assetId: number | null = null;
-
-  try {
-    if (!params?.assets) {
-      return (
-        <SafeAreaView className="bg-white mb-10">
-          <Text>Missing assets parameter</Text>
-        </SafeAreaView>
-      );
-    }
-
-    // params.assets can arrive as a JSON string, an array with a JSON string,
-    // or already as a parsed object depending on navigation method.
-    if (typeof params.assets === "string") {
-      assets = JSON.parse(params.assets) as Asset[];
-    } else if (Array.isArray(params.assets) && typeof params.assets[0] === "string") {
-      assets = JSON.parse(params.assets[0] as string) as Asset[];
-    } else {
-      // Fallback: attempt to use it directly (any) then coerce
-      assets = (params.assets as any) as Asset[];
-    }
-
-    // Parse the assetId safely
-    const rawId = params?.assetId;
-    if (!rawId) {
-      return (
-        <SafeAreaView className="bg-white mb-10">
-          <Text>Missing assetId parameter</Text>
-        </SafeAreaView>
-      );
-    }
-
-    assetId = parseInt(Array.isArray(rawId) ? rawId[0] : (rawId as string), 10);
-    if (Number.isNaN(assetId)) {
-      return (
-        <SafeAreaView className="bg-white mb-10">
-          <Text>Invalid assetId parameter</Text>
-        </SafeAreaView>
-      );
-    }
-  } catch (err) {
-    return (
-      <SafeAreaView className="bg-white mb-10">
-        <Text>Error parsing route parameters</Text>
-      </SafeAreaView>
-    );
-  }
-
-  // Find the asset by ID
-  const asset: Asset | undefined = assets.find(
-    (asset) => asset.asset_id === assetId,
+  const { user } = useUser();
+  const assets = useMemo(() => parseAssets(params.assets), [params.assets]);
+  const assetId = Number(
+    Array.isArray(params.assetId) ? params.assetId[0] : params.assetId,
   );
+  const asset = assets.find((item) => item.asset_id === assetId);
 
-  // Handle the case where the asset is not found
-  if (!asset) {
-    return (
-      <SafeAreaView className="bg-white mb-10">
-        <Text>Asset not found</Text>
-      </SafeAreaView>
-    );
-  }
-
-  const [assetName, setAssetName] = useState(asset.asset_name);
-  const [valueHistory, setValueHistory] = useState(asset.value_history);
+  const [assetName, setAssetName] = useState(asset?.asset_name ?? "");
+  const [valueHistory, setValueHistory] = useState<AssetValueHistoryDataType[]>(
+    asset?.value_history ?? [],
+  );
+  const [range, setRange] = useState<Range>("1Y");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [newAssetValue, setNewAssetValue] = useState("");
-  const { user } = useUser();
-
-  // Reset state when assetId changes
-  useEffect(() => {
-    setAssetName(asset.asset_name);
-    setValueHistory(asset.value_history);
-  }, [assetId]);
-
-  // Navigate back to the home page
-  const handleReturn = () => {
-    router.back();
-  };
-
-  const handleNameChange = (text: string) => {
-    setAssetName(text);
-    asset.asset_name = text;
-  };
+  const hasPendingChanges = useRef(false);
 
   useEffect(() => {
+    if (!asset || !user || !hasPendingChanges.current) return;
+    hasPendingChanges.current = false;
+
     const saveData = async () => {
-      const assetIndex = assets.findIndex(
-        (index) => index.asset_id === assetId,
+      const updatedAssets = assets.map((item) =>
+        item.asset_id === assetId
+          ? { ...item, asset_name: assetName, value_history: valueHistory }
+          : item,
       );
 
-      const updatedAsset = {
-        ...assets[assetIndex],
-        asset_name: assetName,
-        value_history: valueHistory,
-      };
-
-      const updatedAssets = [...assets];
-      updatedAssets[assetIndex] = updatedAsset;
-
       try {
-        if (user) {
-          await fetchAPI("/(api)/user", {
-            method: "PUT",
-            body: JSON.stringify({
-              clerkId: user.id,
-              assets: updatedAssets,
-            }),
-          });
-        } else {
-          console.error("User not found or user ID is missing");
-        }
-      } catch (error) {
-        console.error("Error saving data:", error);
+        await fetchAPI("/(api)/user", {
+          method: "PUT",
+          body: JSON.stringify({ clerkId: user.id, assets: updatedAssets }),
+        });
+      } catch {
+        Alert.alert("Save failed", "Your changes could not be saved.");
       }
     };
 
-    if (valueHistory !== asset.value_history) {
-      saveData();
-    }
-  }, [assetName, valueHistory]);
+    void saveData();
+  }, [asset, assetId, assetName, assets, user, valueHistory]);
 
-  const handleAddRow = () => {
-    setShowDatePicker(true);
+  const visibleHistory = useMemo(() => {
+    if (range === "All") return valueHistory;
+
+    const latest = valueHistory.at(-1);
+    if (!latest) return [];
+
+    const monthsToShow = range === "1M" ? 1 : range === "6M" ? 6 : 12;
+    const cutoff = parseHistoryDate(latest.date);
+    cutoff.setMonth(cutoff.getMonth() - monthsToShow);
+
+    return valueHistory.filter((item) => parseHistoryDate(item.date) >= cutoff);
+  }, [range, valueHistory]);
+
+  const currentValue = valueHistory.at(-1)?.value ?? 0;
+  const firstValue = visibleHistory[0]?.value ?? currentValue;
+  const change = currentValue - firstValue;
+  const changePercent = firstValue ? (change / firstValue) * 100 : 0;
+  const isPositive = change >= 0;
+
+  const updateValue = (index: number, value: string) => {
+    const numericValue = value === "" ? 0 : Number(value);
+    if (Number.isNaN(numericValue)) return;
+    hasPendingChanges.current = true;
+    setValueHistory((history) =>
+      history.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, value: numericValue } : item,
+      ),
+    );
   };
 
-  const handleDateSelection = () => {
-    // Create the date in YYYY/MM/DD format
-    const formattedDate = formatDate(
-      new Date(selectedYear, selectedMonth - 1, 1),
+  const removeValue = (index: number) => {
+    if (valueHistory.length <= 1) return;
+    hasPendingChanges.current = true;
+    hasPendingChanges.current = true;
+    setValueHistory((history) =>
+      history
+        .filter((_, itemIndex) => itemIndex !== index)
+        .map((item, month) => ({ ...item, month })),
     );
+  };
 
-    // Check if this date already exists
-    const dateExists = valueHistory.some(
-      (entry) => entry.date === formattedDate,
-    );
+  const addValue = () => {
+    const date = formatDate(new Date(selectedYear, selectedMonth - 1, 1));
 
-    if (dateExists) {
-      alert(`Data for ${formattedDate} already exists!`);
-      setShowDatePicker(false);
+    if (valueHistory.some((item) => item.date === date)) {
+      Alert.alert("Date already added", `A value for ${date} already exists.`);
       return;
     }
 
-    // Use the entered value or default to 0
-    const value = newAssetValue === "" ? 0 : parseFloat(newAssetValue);
-
-    const newRow = {
-      date: formattedDate,
-      value: value,
-      month: 0, // Will be reindexed below
-    };
-
-    // Add the new row and sort by date to maintain chronological order
-    const updatedHistory = [...valueHistory, newRow].sort((a, b) =>
-      a.date.localeCompare(b.date),
-    );
-
-    // Update month indices to maintain proper order and ensure consistency
-    const reindexedHistory = updatedHistory.map((entry, index) => ({
-      date: entry.date,
-      value: Number(entry.value), // Ensure value is a number
-      month: index, // Consistent month indexing
-    }));
-
-    setValueHistory(reindexedHistory);
-    setShowDatePicker(false);
-    setNewAssetValue(""); // Reset the value input
-  };
-
-  // Remove a row from the value history
-  const handleRemoveRow = () => {
-    if (valueHistory.length > 1) {
-      setValueHistory(valueHistory.slice(0, -1));
+    const value = Number(newAssetValue);
+    if (!newAssetValue || Number.isNaN(value)) {
+      Alert.alert("Enter a value", "Add a valid asset value to continue.");
+      return;
     }
+
+    setValueHistory((history) =>
+      [...history, { date, value, month: 0 }]
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .map((item, month) => ({ ...item, month })),
+    );
+    setNewAssetValue("");
+    setShowDatePicker(false);
   };
 
-  const handleUpdate = (index: number, value: string) => {
-    const updatedHistory = [...valueHistory];
-
-    const numericValue = value === "" ? 0 : parseFloat(value);
-
-    updatedHistory[index] = {
-      date: updatedHistory[index].date,
-      value: numericValue,
-      month: updatedHistory[index].month || index, // Ensure month exists
-    };
-
-    setValueHistory(updatedHistory);
-  };
-
-  const handleDeleteAsset = async () => {
+  const deleteAsset = () => {
     Alert.alert(
-      "Confirm Deletion",
-      "Are you sure you want to delete this asset?",
+      "Delete asset",
+      "This asset and its value history will be permanently deleted.",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
+          style: "destructive",
           onPress: async () => {
-            const updatedAssets = assets.filter(
-              (asset) => asset.asset_id !== assetId,
-            );
-
+            if (!user) return;
             try {
-                if (user) {
-                try {
-                  await fetchAPI("/(api)/user", {
-                  method: "PUT",
-                  body: JSON.stringify({
-                    clerkId: user.id,
-                    assets: updatedAssets,
-                  }),
-                  });
-                  handleReturn();
-                } catch (error) {
-                  Alert.alert("Error", "Failed to delete the asset. Please try again.");
-                }
-                } else {
-                  Alert.alert("Error", "User not found.");
-                }
-            } catch (error) {
+              await fetchAPI("/(api)/user", {
+                method: "PUT",
+                body: JSON.stringify({
+                  clerkId: user.id,
+                  assets: assets.filter((item) => item.asset_id !== assetId),
+                }),
+              });
+              router.back();
+            } catch {
+              Alert.alert("Delete failed", "The asset could not be deleted.");
             }
           },
         },
@@ -258,321 +212,292 @@ function ItemDetail() {
     );
   };
 
-  return (
-    <SafeAreaView className="bg-gray-50 flex-1">
-      {/* Modern Header */}
-      <View className="bg-white border-b border-gray-100 px-6 py-4 shadow-sm">
-        <View className="flex-row items-center justify-between">
-          <TouchableOpacity
-            onPress={handleReturn}
-            className="flex-row items-center bg-gray-100 px-4 py-2 rounded-full"
-          >
-            <Text className="text-gray-700 font-semibold">← Back</Text>
-          </TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-900">
-            Asset Details
+  if (!asset) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-secondary-100 px-6">
+        <Ionicons name="alert-circle-outline" size={32} color="#858585" />
+        <Text className="mt-4 text-lg font-semibold text-secondary-900">
+          Asset not found
+        </Text>
+        <TouchableOpacity className="mt-6" onPress={() => router.back()}>
+          <Text className="font-semibold text-primary-600">
+            Return to portfolio
           </Text>
-          {/* Spacer for center alignment */}
-          <View className="w-20" />
-        </View>
-      </View>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
+  return (
+    <SafeAreaView
+      className="flex-1 bg-secondary-100"
+      edges={["top", "left", "right"]}
+    >
       <FlatList
+        className="px-6"
+        contentContainerStyle={{ paddingBottom: 36 }}
         data={[...valueHistory].reverse()}
+        keyExtractor={(item) => item.date}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
         renderItem={({ item, index }) => {
-          // Map reversed index back to original for updates/deletes
           const originalIndex = valueHistory.length - 1 - index;
-          
           return (
-            <View className="bg-white mx-4 mb-3 rounded-2xl border border-gray-100 shadow-sm">
-              <View className="flex-row items-center p-4">
-                {/* Date Column */}
-                <View className="flex-1">
-                  <Text className="text-sm font-medium text-gray-500 mb-1">
-                    Date
+            <View className="flex-row items-center border-b border-secondary-300 py-4">
+              <View className="flex-1">
+                <Text className="text-sm text-secondary-600">{item.date}</Text>
+                <View className="mt-1 flex-row items-center">
+                  <Text className="text-base font-semibold text-secondary-900">
+                    $
                   </Text>
-                  <Text className="text-base font-semibold text-gray-900">
-                    {item.date}
-                  </Text>
+                  <TextInput
+                    className="ml-0.5 min-w-24 py-0 text-base font-semibold text-secondary-900"
+                    keyboardType="decimal-pad"
+                    onChangeText={(text) => updateValue(originalIndex, text)}
+                    selectTextOnFocus
+                    value={item.value.toString()}
+                  />
                 </View>
-
-                {/* Value Input Column */}
-                <View className="flex-1">
-                  <Text className="text-sm font-medium text-gray-500 mb-1">
-                    Value
-                  </Text>
-                  <View className="flex-row items-center bg-gray-50 rounded-xl px-3 py-2">
-                    <Text className="font-medium text-gray-600 mr-1">$</Text>
-                    <TextInput
-                      value={item.value.toString()}
-                      onChangeText={(text) => handleUpdate(originalIndex, text)}
-                      className="flex-1 font-semibold text-base text-gray-900"
-                      keyboardType="numeric"
-                      placeholder="0.00"
-                      placeholderTextColor="#9CA3AF"
-                    />
-                  </View>
-                </View>
-
-                {/* Minimal Delete Button */}
-                <TouchableOpacity
-                  onPress={() => {
-                    if (valueHistory.length > 1) {
-                      const updatedHistory = valueHistory
-                        .filter((_, i) => i !== originalIndex)
-                        .map((entry, index) => ({
-                          date: entry.date,
-                          value: Number(entry.value),
-                          month: index, // Reindex after deletion
-                        }));
-                      setValueHistory(updatedHistory);
-                    }
-                  }}
-                  className="ml-3 w-8 h-8 bg-red-100 rounded-full items-center justify-center"
-                >
-                  <Text className="text-red-500 font-bold text-sm">×</Text>
-                </TouchableOpacity>
               </View>
+              <TouchableOpacity
+                accessibilityLabel={`Remove value from ${item.date}`}
+                className="h-10 w-10 items-center justify-center"
+                disabled={valueHistory.length <= 1}
+                onPress={() => removeValue(originalIndex)}
+              >
+                <Ionicons
+                  color={valueHistory.length <= 1 ? "#C2C2C2" : "#C53030"}
+                  name="trash-outline"
+                  size={19}
+                />
+              </TouchableOpacity>
             </View>
           );
         }}
-        keyExtractor={(item, index) => index.toString()}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 120,
-        }}
-        ListEmptyComponent={() => (
-          <View className="flex-1 items-center justify-center py-20">
-            {valueHistory.length === 0 ? (
-              <View className="items-center px-8">
-                <View className="w-16 h-16 bg-gray-100 rounded-full items-center justify-center mb-4">
-                  <Text className="text-2xl">📊</Text>
-                </View>
-                <Text className="text-lg font-bold text-gray-900 mb-2 text-center">
-                  No Data Points
-                </Text>
-                <Text className="text-gray-600 font-medium text-center">
-                  Add your first data point to start tracking this asset.
-                </Text>
-              </View>
-            ) : (
-              <ActivityIndicator size="small" color="#4ca44d" />
-            )}
-          </View>
-        )}
         ListHeaderComponent={
-          <>
-            {/* Asset Name Section */}
-            <View className="bg-white mx-4 my-4 rounded-3xl border border-gray-100 shadow-sm p-6">
-              <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-500 mb-2">
-                  Asset Name
-                </Text>
-                <View className="flex-row items-center bg-gray-50 rounded-2xl border-2 border-gray-100 px-4 py-3">
-                  <Image
-                    source={icons.edit}
-                    className="w-5 h-5 mr-3"
-                    style={{ tintColor: "#6B7280" }}
-                    resizeMode="contain"
-                  />
-                  <TextInput
-                    value={assetName}
-                    onChangeText={handleNameChange}
-                    className="flex-1 text-xl font-extrabold text-gray-900"
-                    placeholder="Enter asset name"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
-            </View>
-
-            {/* Chart Section */}
-            <View className="bg-white mx-4 mb-6 rounded-3xl border border-gray-100 shadow-sm p-6">
-              <FinanceChart
-                data={valueHistory}
-                showCurrentStatusTitle={true}
-                height={320}
-                showInteractiveFeatures={true}
-              />
-            </View>
-
-            {/* Data Points Header with Add button */}
-            <View className="flex-row items-center justify-between mx-4 mb-4">
-              <Text className="text-xl font-bold text-gray-900">
-                Data Points
-              </Text>
-              <View className="flex-row items-center">
-                <View className="bg-primary-100 px-3 py-1 rounded-full">
-                  <Text className="text-primary-700 font-semibold text-sm">
-                    {valueHistory.length} entries
-                  </Text>
-                </View>
-                
-                {/* Minimal Add button */}
-                <TouchableOpacity
-                  onPress={handleAddRow}
-                  className="ml-3 w-8 h-8 bg-primary-500 rounded-full items-center justify-center"
-                >
-                  <Text className="text-white font-bold text-sm">+</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </>
-        }
-
-        ListFooterComponent={
-          <View className="mx-4 mt-6">
-            {/* Danger Zone */}
-            <View className="h-px bg-gray-200 mx-6 mb-6" />
-            <View className="bg-red-50 border border-red-200 rounded-3xl p-6">
-              <Text className="text-lg font-bold text-red-800 mb-2">
-                Danger Zone
-              </Text>
-              <Text className="text-red-600 font-medium text-sm mb-4">
-                This action cannot be undone. All data will be permanently
-                deleted.
-              </Text>
-
+          <View>
+            <View className="mt-2 flex-row items-center justify-between py-2">
               <TouchableOpacity
-                onPress={handleDeleteAsset}
-                className="bg-white py-3 px-6 rounded-2xl shadow-sm"
+                accessibilityLabel="Back"
+                className="h-11 w-11 items-center justify-center rounded-full border border-secondary-300"
+                onPress={() => router.back()}
               >
-                <Text className="text-red-500 text-center font-bold">
-                  Delete Asset
+                <Ionicons name="chevron-back" size={23} color="#333333" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityLabel="Delete asset"
+                className="h-11 w-11 items-center justify-center"
+                onPress={deleteAsset}
+              >
+                <Ionicons name="trash-outline" size={21} color="#C53030" />
+              </TouchableOpacity>
+            </View>
+
+            <View className="mt-5 flex-row items-center">
+              <TextInput
+                className="flex-1 py-0 text-[30px] font-bold tracking-[-0.8px] text-secondary-900"
+                onChangeText={(text) => {
+                  hasPendingChanges.current = true;
+                  setAssetName(text);
+                }}
+                placeholder="Asset name"
+                placeholderTextColor="#999999"
+                value={assetName}
+              />
+              <Ionicons color="#858585" name="pencil-outline" size={20} />
+            </View>
+
+            <View className="mt-8">
+              <Text className="text-[40px] font-bold leading-[46px] tracking-[-1.2px] text-secondary-900">
+                ${formatCurrency(currentValue)}
+              </Text>
+              <Text
+                className={`mt-2 text-base font-semibold ${isPositive ? "text-primary-600" : "text-danger-600"}`}
+              >
+                {isPositive ? "+" : "-"}${formatCurrency(Math.abs(change))} (
+                {isPositive ? "+" : ""}
+                {changePercent.toFixed(1)}%)
+              </Text>
+            </View>
+
+            <View className="mt-5">
+              <PortfolioChart data={visibleHistory} />
+            </View>
+
+            <View className="mt-4 flex-row border-b border-secondary-300 pb-5">
+              {ranges.map((item) => {
+                const selected = item === range;
+                return (
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel={`Show ${item} asset history`}
+                    accessibilityState={{ selected }}
+                    activeOpacity={1}
+                    className="min-h-11 flex-1 items-center justify-center"
+                    key={item}
+                    onPress={() => setRange(item)}
+                  >
+                    <View
+                      className={`h-11 w-16 items-center justify-center rounded-full ${
+                        selected ? "bg-[#EAF5EA]" : "bg-transparent"
+                      }`}
+                    >
+                      <Text
+                        className={`text-base font-medium ${
+                          selected ? "text-primary-600" : "text-secondary-700"
+                        }`}
+                      >
+                        {item}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <View className="mt-6 flex-row items-center justify-between">
+              <View>
+                <Text className="text-2xl font-bold tracking-[-0.4px] text-secondary-900">
+                  Value history
+                </Text>
+                <Text className="mt-1 text-sm text-secondary-600">
+                  {valueHistory.length}{" "}
+                  {valueHistory.length === 1 ? "entry" : "entries"}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                <Text className="text-base font-semibold text-primary-600">
+                  + Add
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
+        }
+        ListEmptyComponent={
+          <View className="items-center py-12">
+            <ActivityIndicator color="#449445" size="small" />
           </View>
         }
       />
 
-      {/* Modern Date Picker Modal */}
       <Modal
-        visible={showDatePicker}
         animationType="slide"
-        transparent={true}
         onRequestClose={() => setShowDatePicker(false)}
+        transparent
+        visible={showDatePicker}
       >
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-3xl p-6 max-h-4/5">
-            {/* Modal Header */}
-            <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-2xl font-extrabold text-gray-900">
-                Select Date
+        <View className="flex-1 justify-end bg-black/40">
+          <View className="rounded-t-[28px] bg-secondary-100 px-6 pb-10 pt-6">
+            <View className="mb-7 flex-row items-center justify-between">
+              <Text className="text-2xl font-bold tracking-[-0.4px] text-secondary-900">
+                Add value
               </Text>
               <TouchableOpacity
+                className="h-10 w-10 items-center justify-center rounded-full border border-secondary-300"
                 onPress={() => setShowDatePicker(false)}
-                className="w-8 h-8 bg-gray-100 rounded-full items-center justify-center"
               >
-                <Text className="text-gray-600 font-bold">✕</Text>
+                <Ionicons name="close" size={22} color="#666666" />
               </TouchableOpacity>
             </View>
 
-            {/* Year Selection */}
-            <View className="mb-6">
-              <Text className="text-lg font-bold mb-3 text-gray-900">
-                Year
-              </Text>
-              <ScrollView className="max-h-32 bg-gray-50 rounded-2xl border border-gray-200">
-                {Array.from(
-                  { length: 10 },
-                  (_, i) => new Date().getFullYear() - 5 + i,
-                ).map((year) => (
-                  <TouchableOpacity
-                    key={year}
-                    className={`p-4 border-b border-gray-200 ${selectedYear === year ? "bg-primary-100" : ""}`}
-                    onPress={() => setSelectedYear(year)}
+            <Text className="mb-2 text-sm font-medium text-secondary-700">
+              Year
+            </Text>
+            <View className="mb-6 flex-row">
+              {Array.from(
+                { length: 5 },
+                (_, index) => new Date().getFullYear() - 2 + index,
+              ).map((year) => (
+                <TouchableOpacity
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: selectedYear === year }}
+                  activeOpacity={1}
+                  className="w-1/5 pr-2"
+                  key={year}
+                  onPress={() => setSelectedYear(year)}
+                >
+                  <View
+                    className="items-center rounded-full border py-2.5"
+                    style={
+                      selectedYear === year
+                        ? dateOptionStyle.selected
+                        : dateOptionStyle.default
+                    }
                   >
                     <Text
-                      className={`text-center ${selectedYear === year ? "font-bold text-primary-600" : "font-medium text-gray-700"}`}
+                      className="font-semibold"
+                      style={
+                        selectedYear === year
+                          ? dateOptionTextStyle.selected
+                          : dateOptionTextStyle.default
+                      }
                     >
                       {year}
                     </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+                  </View>
+                </TouchableOpacity>
+              ))}
             </View>
 
-            {/* Month Selection */}
-            <View className="mb-6">
-              <Text className="text-lg font-bold mb-3 text-gray-900">
-                Month
-              </Text>
-              <ScrollView className="max-h-48 bg-gray-50 rounded-2xl border border-gray-200">
-                {[
-                  "January",
-                  "February",
-                  "March",
-                  "April",
-                  "May",
-                  "June",
-                  "July",
-                  "August",
-                  "September",
-                  "October",
-                  "November",
-                  "December",
-                ].map((month, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    className={`p-4 border-b border-gray-200 ${selectedMonth === index + 1 ? "bg-primary-100" : ""}`}
-                    onPress={() => setSelectedMonth(index + 1)}
+            <Text className="mb-2 text-sm font-medium text-secondary-700">
+              Month
+            </Text>
+            <View className="mb-6 flex-row flex-wrap">
+              {months.map((month, index) => (
+                <TouchableOpacity
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: selectedMonth === index + 1 }}
+                  activeOpacity={1}
+                  className="mb-2 w-1/4 pr-2"
+                  key={month}
+                  onPress={() => setSelectedMonth(index + 1)}
+                >
+                  <View
+                    className="items-center rounded-lg border py-2.5"
+                    style={
+                      selectedMonth === index + 1
+                        ? dateOptionStyle.selected
+                        : dateOptionStyle.default
+                    }
                   >
                     <Text
-                      className={`text-center ${selectedMonth === index + 1 ? "font-bold text-primary-600" : "font-medium text-gray-700"}`}
+                      className="font-medium"
+                      style={
+                        selectedMonth === index + 1
+                          ? dateOptionTextStyle.selected
+                          : dateOptionTextStyle.default
+                      }
                     >
                       {month}
                     </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+                  </View>
+                </TouchableOpacity>
+              ))}
             </View>
 
-            {/* Value Input Section */}
-            <View className="mb-6">
-              <Text className="text-lg font-bold mb-3 text-gray-900">
-                Asset Value
+            <Text className="mb-2 text-sm font-medium text-secondary-700">
+              Value
+            </Text>
+            <View className="mb-7 min-h-14 flex-row items-center rounded-xl border border-secondary-300 bg-white px-4">
+              <Text className="text-base text-secondary-600">$</Text>
+              <TextInput
+                className="ml-2 flex-1 py-4 text-base font-semibold text-secondary-900"
+                keyboardType="decimal-pad"
+                onChangeText={setNewAssetValue}
+                placeholder="0.00"
+                placeholderTextColor="#999999"
+                value={newAssetValue}
+              />
+            </View>
+
+            <TouchableOpacity
+              className="min-h-14 items-center justify-center rounded-full bg-primary-600 px-6"
+              onPress={addValue}
+            >
+              <Text className="text-base font-semibold text-white">
+                Add value
               </Text>
-              <View className="flex-row items-center bg-gray-50 rounded-2xl border border-gray-200 px-4 py-4">
-                <Text className="text-gray-600 mr-2 text-lg">$</Text>
-                <TextInput
-                  value={newAssetValue}
-                  onChangeText={setNewAssetValue}
-                  style={{
-                    flex: 1,
-                    fontSize: 18,
-                    fontWeight: '600',
-                    color: '#111827',
-                  }}
-                  keyboardType="numeric"
-                  placeholder="0.00"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-            </View>
-
-            {/* Action Buttons */}
-            <View className="flex-row gap-4">
-              <TouchableOpacity
-                className="flex-1 bg-gray-100 py-4 rounded-2xl"
-                onPress={() => {
-                  setShowDatePicker(false);
-                  setNewAssetValue(""); // Reset value when canceling
-                }}
-              >
-                <Text className="text-gray-700 text-center font-bold">
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 bg-primary-500 py-4 rounded-2xl shadow-sm"
-                onPress={handleDateSelection}
-              >
-                <Text className="text-white text-center font-bold">
-                  Add Data Point
-                </Text>
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
