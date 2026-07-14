@@ -2,13 +2,13 @@ import {
   TextInput,
   View,
   Text,
-  Image,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
 } from "react-native";
 import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
 import { InputFieldProps } from "@/types/type";
 
@@ -19,65 +19,62 @@ const InputField = ({
   labelStyle,
   containerStyle,
   inputStyle,
-  iconStyle,
   className,
   ...props
 }: InputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [hasValue, setHasValue] = useState(false);
+  const normalizedLabel = label.toLowerCase();
+  const iconName: React.ComponentProps<typeof Ionicons>["name"] =
+    normalizedLabel.includes("asset")
+      ? "pencil-outline"
+      : normalizedLabel.includes("verification")
+        ? "key-outline"
+        : secureTextEntry
+          ? "lock-closed-outline"
+          : props.keyboardType === "numeric"
+            ? "cash-outline"
+            : "mail-outline";
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View className="my-3 w-full">
+        <View className={`mb-6 w-full ${className}`}>
           <Text
-            className={`text-sm font-semibold mb-3 text-gray-700 ${labelStyle}`}
+            className={`mb-2 text-sm font-medium text-secondary-700 ${labelStyle}`}
           >
             {label}
           </Text>
           <View
             className={`
-              flex-row items-center relative
-              bg-white rounded-xl border 
-              shadow-sm overflow-hidden
+              min-h-14 flex-row items-center rounded-xl border bg-white px-4
               ${
                 isFocused
-                  ? "border-primary-500 shadow-md shadow-primary-100"
+                  ? "border-primary-600"
                   : hasValue
-                    ? "border-gray-300"
-                    : "border-gray-200"
+                    ? "border-secondary-400"
+                    : "border-secondary-300"
               }
               ${containerStyle}
             `}
           >
-            {isFocused && (
-              <View className="absolute left-0 top-0 bottom-0 w-1 bg-primary-500" />
-            )}
-
             {icon && (
-              <View className="ml-4 mr-3">
-                <Image
-                  source={icon}
-                  className={`w-5 h-5 ${iconStyle}`}
-                  style={{
-                    tintColor: isFocused
-                      ? "#4ca44d"
-                      : hasValue
-                        ? "#374151"
-                        : "#9CA3AF",
-                  }}
+              <View className="mr-3">
+                <Ionicons
+                  name={iconName}
+                  size={20}
+                  color={isFocused ? "#449445" : "#858585"}
                 />
               </View>
             )}
             <TextInput
               className={`
-                flex-1 py-4 px-2 font-medium text-base text-gray-900
-                ${icon ? "" : "ml-4"}
+                flex-1 py-4 text-base font-medium text-secondary-900
                 ${inputStyle}
               `}
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#999999"
               secureTextEntry={secureTextEntry}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
@@ -89,14 +86,7 @@ const InputField = ({
               }}
               {...props}
             />
-
-            {isFocused && (
-              <View className="absolute right-0 top-0 bottom-0 w-0.5 bg-primary-500" />
-            )}
           </View>
-
-          {/* Optional helper text space */}
-          <View className="h-1 mt-1" />
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>

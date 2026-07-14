@@ -1,12 +1,21 @@
 import { useSignUp } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, Image, ScrollView, Text, View, Modal, Pressable } from "react-native";
+import {
+  Alert,
+  ScrollView,
+  Text,
+  View,
+  Modal,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
 
 import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputField";
 import OAuth from "@/components/OAuth";
-import { icons, images } from "@/constants";
+import { icons } from "@/constants";
+import { Ionicons } from "@expo/vector-icons";
 import { fetchAPI } from "@/lib/fetch";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -78,22 +87,25 @@ const SignUp = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="flex-1">
-        <View className="flex-1 bg-white">
-          <View className="relative w-full h-[250px]">
-            <Image
-              source={images.banner}
-              className="z-0 w-full h-[250px] ml-[-5px]"
-            />
-            <Text className="text-2xl text-black font-bold absolute top-7 left-5">
-              Get Started!
+    <SafeAreaView className="flex-1 bg-secondary-100">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="flex-1 px-6 pb-8 pt-12">
+          <View className="mb-12">
+            <Text className="text-[38px] font-bold tracking-[-1px] text-secondary-900">
+              Create account
+            </Text>
+            <Text className="mt-3 text-base leading-6 text-secondary-600">
+              Keep your holdings and balance history in one place.
             </Text>
           </View>
-          <View className="p-5">
+          <View className="border-t border-secondary-300 pt-8">
             <InputField
               label="Email"
-              placeholder="Enter email"
+              placeholder="name@example.com"
               icon={icons.email}
               textContentType="emailAddress"
               value={form.email}
@@ -101,7 +113,7 @@ const SignUp = () => {
             />
             <InputField
               label="Password"
-              placeholder="Enter password"
+              placeholder="Password"
               icon={icons.lock}
               secureTextEntry={true}
               textContentType="password"
@@ -111,16 +123,13 @@ const SignUp = () => {
             <CustomButton
               title="Sign Up"
               onPress={onSignUpPress}
-              className="mt-6 bg-primary-400"
+              className="mt-2"
             />
             <OAuth title="Sign Up with Google" />
-            <Pressable
-              onPress={() => router.push("/sign-in")}
-              className="mt-10"
-            >
-              <Text className="text-lg text-center text-general-200">
+            <Pressable onPress={() => router.push("/sign-in")} className="mt-9">
+              <Text className="text-center text-base text-secondary-600">
                 Already have an account?{" "}
-                <Text className="text-primary-500">Log In</Text>
+                <Text className="font-semibold text-primary-600">Sign in</Text>
               </Text>
             </Pressable>
           </View>
@@ -132,16 +141,28 @@ const SignUp = () => {
               setVerification({ ...verification, state: "default" })
             }
           >
-            <View className="flex-1 justify-center items-center bg-black/50">
-              <View className="bg-white px-7 py-9 rounded-2xl min-h-[300px] w-[90%] max-w-sm">
-                <Text className="font-extrabold text-2xl mb-2">
-                  Verification
-                </Text>
-                <Text className="mb-5">
-                  We've sent a verification code to {form.email}.
-                </Text>
+            <View className="flex-1 justify-end bg-black/40">
+              <View className="rounded-t-[28px] bg-secondary-100 px-6 pb-10 pt-6">
+                <View className="mb-7 flex-row items-start justify-between">
+                  <View className="flex-1 pr-6">
+                    <Text className="text-2xl font-bold tracking-[-0.4px] text-secondary-900">
+                      Verify email
+                    </Text>
+                    <Text className="mt-2 text-base leading-6 text-secondary-600">
+                      Enter the code sent to {form.email}.
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() =>
+                      setVerification({ ...verification, state: "default" })
+                    }
+                    className="h-10 w-10 items-center justify-center rounded-full border border-secondary-300"
+                  >
+                    <Ionicons name="close" size={22} color="#666666" />
+                  </TouchableOpacity>
+                </View>
                 <InputField
-                  label={"Code"}
+                  label="Verification code"
                   icon={icons.lock}
                   placeholder={"12345"}
                   value={verification.code}
@@ -158,7 +179,7 @@ const SignUp = () => {
                 <CustomButton
                   title="Verify Email"
                   onPress={onPressVerify}
-                  className="mt-5 bg-success-500"
+                  className="mt-2"
                 />
               </View>
             </View>

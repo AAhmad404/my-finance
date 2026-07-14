@@ -15,7 +15,6 @@ const AddAsset = () => {
   const {
     data: assetsResponse,
     loading,
-    error,
     refetch,
   } = useFetch<any>(`/(api)/assets/${user?.id}`);
 
@@ -82,8 +81,8 @@ const AddAsset = () => {
   // Display loading spinner while fetching data
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" color="#858585" />
+      <View className="flex-1 items-center justify-center bg-secondary-100">
+        <ActivityIndicator size="large" color="#449445" />
       </View>
     );
   }
@@ -91,32 +90,33 @@ const AddAsset = () => {
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      className="flex-1 bg-gray-50"
+      className="flex-1 bg-secondary-100"
     >
       <ScrollView
         className="flex-1 px-6"
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header Section */}
-        <View className="mt-6 mb-8">
-          <Text className="text-3xl font-extrabold text-gray-900 mb-2">
-            Add New Asset
+        <View className="mb-10 mt-5">
+          <Text className="text-[32px] font-bold tracking-[-0.8px] text-secondary-900">
+            Add asset
+          </Text>
+          <Text className="mt-3 max-w-[310px] text-base leading-6 text-secondary-600">
+            Add the current value for an account, investment, or other holding.
           </Text>
         </View>
 
-        {/* Form Section */}
-        <View className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
-          <View className="space-y-6">
+        <View className="border-t border-secondary-300 pt-7">
+          <View>
             <InputField
               label="Asset Name"
-              placeholder="e.g., Savings Account"
+              placeholder="Savings account"
               icon={icons.edit}
               value={assetName}
               onChangeText={setAssetName}
             />
             <InputField
-              label="Current Value"
+              label="Current value"
               placeholder="0.00"
               icon={icons.dollar}
               value={assetValue}
@@ -126,10 +126,9 @@ const AddAsset = () => {
           </View>
         </View>
 
-        {/* Button Section */}
-        <View className="mt-auto">
+        <View className="mt-auto pt-8">
           <CustomButton
-            title="Add Asset"
+            title="Add asset"
             onPress={handleAddAsset}
             disabled={!assetName || !assetValue}
           />

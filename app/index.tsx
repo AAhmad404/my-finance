@@ -1,4 +1,4 @@
-import { Redirect, router } from "expo-router";
+import { router } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
 import { useEffect } from "react";
 import { View, ActivityIndicator, Text } from "react-native";
@@ -14,11 +14,12 @@ const Home = () => {
     }
   }, [isLoaded, isSignedIn]);
 
-  // Show a simple loading screen while Clerk determines auth status to avoid a blank screen
   return (
-    <View className="flex-1 items-center justify-center bg-white">
+    <View className="flex-1 items-center justify-center bg-secondary-100">
       <ActivityIndicator size="large" color="#4ca44d" />
-      <Text className="mt-4 text-gray-600">Checking authentication...</Text>
+      <Text className="mt-4 text-sm font-medium text-secondary-600">
+        Loading MyFinance
+      </Text>
     </View>
   );
 };
