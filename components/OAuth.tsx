@@ -37,12 +37,12 @@ const OAuth: React.FC<OAuthProp> = ({ title }) => {
 
       <CustomButton
         title={title}
-        className="mt-7 w-full"
+        className="mt-7 w-full bg-white"
         IconLeft={() => (
           <Image
             source={icons.google}
             resizeMode="contain"
-            className="w-5 h-5 mx-2"
+            style={{ width: 20, height: 20 }}
           />
         )}
         bgVariant="outline"
