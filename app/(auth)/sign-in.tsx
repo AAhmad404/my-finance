@@ -5,6 +5,7 @@ import { Alert, ScrollView, Text, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomButton from "@/components/CustomButton";
+import AuthHeader from "@/components/AuthHeader";
 import InputField from "@/components/InputField";
 import OAuth from "@/components/OAuth";
 import { icons } from "@/constants";
@@ -67,15 +68,8 @@ const SignIn = () => {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 px-6 pb-8 pt-12">
-          <View className="mb-12">
-            <Text className="text-[38px] font-bold tracking-[-1px] text-secondary-900">
-              Welcome back
-            </Text>
-            <Text className="mt-3 text-base leading-6 text-secondary-600">
-              Sign in to view and manage your portfolio.
-            </Text>
-          </View>
+        <View className="flex-1 px-6 pb-8 pt-4">
+          <AuthHeader title="Welcome back" />
 
           <View className="border-t border-secondary-300 pt-8">
             <InputField
