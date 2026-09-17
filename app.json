@@ -39,7 +39,8 @@
           "imageWidth": 200,
           "enableFullScreenImage_legacy": true
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
