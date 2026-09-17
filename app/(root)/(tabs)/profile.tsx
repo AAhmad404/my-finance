@@ -232,7 +232,7 @@ const Profile = () => {
         />
 
         <Text className="mt-7 text-center text-sm text-secondary-500">
-          MyFinance 1.0.0
+          MyFinance 0.0.1
         </Text>
       </ScrollView>
     </SafeAreaView>
