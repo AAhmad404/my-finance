@@ -295,13 +295,14 @@ function ItemDetail() {
 
             <View className="mt-5 flex-row items-center">
               <TextInput
-                className="flex-1 py-0 text-[30px] font-bold tracking-[-0.8px] text-secondary-900"
+                className="h-10 flex-1 py-0 text-[30px] font-bold leading-[36px] tracking-[-0.8px] text-secondary-900"
                 onChangeText={(text) => {
                   hasPendingChanges.current = true;
                   setAssetName(text);
                 }}
                 placeholder="Asset name"
                 placeholderTextColor="#999999"
+                textAlignVertical="center"
                 value={assetName}
               />
               <Ionicons color="#858585" name="pencil-outline" size={20} />
