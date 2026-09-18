@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import CustomButton from "@/components/CustomButton";
+import AuthHeader from "@/components/AuthHeader";
 import InputField from "@/components/InputField";
 import OAuth from "@/components/OAuth";
 import { icons } from "@/constants";
@@ -93,15 +94,11 @@ const SignUp = () => {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 px-6 pb-8 pt-12">
-          <View className="mb-12">
-            <Text className="text-[38px] font-bold tracking-[-1px] text-secondary-900">
-              Create account
-            </Text>
-            <Text className="mt-3 text-base leading-6 text-secondary-600">
-              Keep your holdings and balance history in one place.
-            </Text>
-          </View>
+        <View className="flex-1 px-6 pb-8 pt-4">
+          <AuthHeader
+            title="Create account"
+            subtitle="Manage your finances in one place."
+          />
           <View className="border-t border-secondary-300 pt-8">
             <InputField
               label="Email"
