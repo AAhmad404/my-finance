@@ -87,6 +87,9 @@ const InputField = ({
               }}
               {...props}
             />
+            {icon && props.textAlign === "center" ? (
+              <View className="w-8" />
+            ) : null}
           </View>
         </View>
       </TouchableWithoutFeedback>

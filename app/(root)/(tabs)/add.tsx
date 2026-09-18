@@ -112,6 +112,7 @@ const AddAsset = () => {
               label="Asset Name"
               placeholder="Savings account"
               icon={icons.edit}
+              textAlign="center"
               value={assetName}
               onChangeText={setAssetName}
             />
@@ -122,6 +123,7 @@ const AddAsset = () => {
               value={assetValue}
               onChangeText={setAssetValue}
               keyboardType="numeric"
+              textAlign="center"
             />
           </View>
         </View>
