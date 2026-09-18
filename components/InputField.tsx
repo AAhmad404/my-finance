@@ -20,6 +20,10 @@ const InputField = ({
   containerStyle,
   inputStyle,
   className,
+  onBlur,
+  onChangeText,
+  onFocus,
+  style,
   ...props
 }: InputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -49,7 +53,7 @@ const InputField = ({
           </Text>
           <View
             className={`
-              min-h-14 flex-row items-center rounded-xl border bg-white px-4
+              h-14 flex-row items-center overflow-hidden rounded-xl border bg-white px-4
               ${
                 isFocused
                   ? "border-primary-600"
@@ -70,26 +74,37 @@ const InputField = ({
               </View>
             )}
             <TextInput
+              {...props}
               className={`
-                h-14 flex-1 py-0 text-base font-medium text-secondary-900
+                h-14 flex-1 py-0 text-base font-medium leading-5 text-secondary-900
                 ${inputStyle}
               `}
+              multiline={false}
+              numberOfLines={1}
               placeholderTextColor="#999999"
               secureTextEntry={secureTextEntry}
+              style={[
+                {
+                  includeFontPadding: false,
+                  paddingBottom: Platform.OS === "ios" ? 2 : 0,
+                  paddingTop: 0,
+                },
+                style,
+              ]}
               textAlignVertical="center"
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+              onFocus={(event) => {
+                setIsFocused(true);
+                onFocus?.(event);
+              }}
+              onBlur={(event) => {
+                setIsFocused(false);
+                onBlur?.(event);
+              }}
               onChangeText={(text) => {
                 setHasValue(text.length > 0);
-                if (props.onChangeText) {
-                  props.onChangeText(text);
-                }
+                onChangeText?.(text);
               }}
-              {...props}
             />
-            {icon && props.textAlign === "center" ? (
-              <View className="w-8" />
-            ) : null}
           </View>
         </View>
       </TouchableWithoutFeedback>

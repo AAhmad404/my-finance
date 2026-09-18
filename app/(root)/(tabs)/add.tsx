@@ -30,6 +30,17 @@ const AddAsset = () => {
   const [assetName, setAssetName] = useState("");
   const [assetValue, setAssetValue] = useState("");
 
+  const handleAssetValueChange = (value: string) => {
+    const cleanedValue = value.replace(/[^0-9.]/g, "");
+    const [wholeNumber, ...decimalParts] = cleanedValue.split(".");
+    const decimalValue = decimalParts.join("").slice(0, 2);
+    const normalizedValue = decimalParts.length
+      ? `${wholeNumber}.${decimalValue}`
+      : wholeNumber;
+
+    setAssetValue(normalizedValue.slice(0, 15));
+  };
+
   const handleAddAsset = async () => {
     if (!assetName || !assetValue) {
       alert("Please fill in all fields");
@@ -110,20 +121,20 @@ const AddAsset = () => {
           <View>
             <InputField
               label="Asset Name"
+              maxLength={32}
               placeholder="Savings account"
               icon={icons.edit}
-              textAlign="center"
               value={assetName}
               onChangeText={setAssetName}
             />
             <InputField
               label="Current value"
+              maxLength={15}
               placeholder="0.00"
               icon={icons.dollar}
               value={assetValue}
-              onChangeText={setAssetValue}
+              onChangeText={handleAssetValueChange}
               keyboardType="numeric"
-              textAlign="center"
             />
           </View>
         </View>
