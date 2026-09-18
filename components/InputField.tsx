@@ -71,11 +71,12 @@ const InputField = ({
             )}
             <TextInput
               className={`
-                flex-1 py-4 text-base font-medium text-secondary-900
+                h-14 flex-1 py-0 text-base font-medium text-secondary-900
                 ${inputStyle}
               `}
               placeholderTextColor="#999999"
               secureTextEntry={secureTextEntry}
+              textAlignVertical="center"
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               onChangeText={(text) => {
